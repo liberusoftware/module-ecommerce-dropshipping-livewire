@@ -1,0 +1,9 @@
+/vendor/
+/composer.lock
+/.phpunit.cache/
+/build/
+/coverage/
+/pint.phar
+/phpstan.local.neon
+/pint.local.json
+.phpunit.result.cache

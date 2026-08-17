@@ -1,0 +1,25 @@
+{
+    "name": "ecommerce-dropshipping-livewire",
+    "version": "0.1.0",
+    "description": "One Livewire component for the shopper: what has been despatched of their own order, when it was promised, and the carrier references a supplier reported.",
+    "category": "presentation",
+    "provider": "Liberu\\Ecommerce\\Dropshipping\\Livewire\\DropshippingLivewireServiceProvider",
+    "requires": {
+        "packages": {
+            "liberusoftware/ecommerce-dropshipping": "^0.1"
+        }
+    },
+    "features": [
+        "One component, because one shopper-facing fact exists: what has happened to the shopper's own order",
+        "No supplier reference, name or code reaches a shopper, and a boundary case asserts it over every file",
+        "No cost, no margin and no currency reaches a shopper; the word cost does not appear in the rendered output",
+        "Nothing here is an input to routing: there is no supplier control, no writable property and no domain action call",
+        "A promise nobody made renders as absent, never as an invented date",
+        "onTime null is rendered as unknown, never as late; null and false are different facts",
+        "Partly despatched and fully despatched are different sentences, and the per-line quantities are shown for the first",
+        "A despatch with no carrier reported shows the tracking reference without inventing a carrier",
+        "No such order, not your order, an erased destination and an order with nothing to despatch are one answer",
+        "Every public property is locked; the writable set and the submittable set are both empty",
+        "Every concrete domain exception is classified, and none of the messages names a reference or a supplier"
+    ]
+}
