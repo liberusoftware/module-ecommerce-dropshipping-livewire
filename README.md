@@ -1,84 +1,84 @@
-# Ecommerce: Dropshipping Livewire
+# Ecommerce Dropshipping — Livewire
 
-> This optional Livewire 4 presentation package provides interactive server-driven components for exactly one independent domain module. Components coordinate public queries/actions and presentation state; they do not own persistence, authorization decisions, tenancy, business rules, or theme identity. The package has no dependency on application Ap
+[![Tests](https://github.com/liberusoftware/module-ecommerce-dropshipping-livewire/actions/workflows/tests.yml/badge.svg)](https://github.com/liberusoftware/module-ecommerce-dropshipping-livewire/actions/workflows/tests.yml)
 
-[Software](https://liberusoftware.com) ·
-[Hosting](https://liberuhosting.com) ·
-[Services](https://liberuservices.com) ·
-[Liberu Group](https://liberugroup.com)
+The shopper's side of [`liberusoftware/ecommerce-dropshipping`](https://github.com/liberusoftware/module-ecommerce-dropshipping):
+**one** Livewire 4 component, because there is exactly one thing about dropshipping
+a shopper is entitled to see.
 
-![PHP](https://img.shields.io/badge/PHP-8.5-777BB4?logo=php&logoColor=white) ![Laravel](https://img.shields.io/badge/Laravel-13-FF2D20?logo=laravel&logoColor=white) ![Livewire](https://img.shields.io/badge/Livewire-4-FB70A9)
-[![Latest release](https://img.shields.io/github/v/release/liberusoftware/module-ecommerce-dropshipping-livewire?sort=semver)](https://github.com/liberusoftware/module-ecommerce-dropshipping-livewire/releases/latest) [![Tests](https://github.com/liberusoftware/module-ecommerce-dropshipping-livewire/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/liberusoftware/module-ecommerce-dropshipping-livewire/actions/workflows/tests.yml)
+## The component
 
-## Features
+| Alias | What it renders |
+| --- | --- |
+| `dropshipping::order-despatch` | What has been despatched of the shopper's own order, when it was promised, and the carrier references the supplier reported. |
 
-- Fully compatible with **Laravel 13**, **PHP 8.5**, and **Pest 5**.
-- Built following the domain-driven design guidelines of the Liberu architecture.
-- Reusable, presenting a clean public contract and boundaries.
-- Adheres to the strict database, security, and authorization standards of Liberu.
-
-## Requirements
-
-- **PHP 8.5**
-- **Composer 2**
-- A supported database (e.g. MySQL, PostgreSQL, SQLite)
-
-## Quick start
-
-To install this package via Composer, run:
-
-```bash
-composer require liberusoftware/module-ecommerce-dropshipping-livewire
+```blade
+<livewire:dynamic-component :component="'dropshipping::order-despatch'"
+    :tenant-id="$tenantId"
+    :destination-ref="$destinationRef"
+    :order-ref="$orderRef" />
 ```
 
-## Documentation
+Three references the host already holds, all `#[Locked]`, and nothing else. The
+host authorises them before it mounts anything; this package cannot do that for
+it.
 
-- [Liberu Main Documentation](https://github.com/liberusoftware/documentation)
-- [Architecture & Standards Index](https://github.com/liberusoftware/documentation/tree/main/architecture)
+## Why one component
 
-## Related Liberu Projects
+Dropshipping is a merchant-facing capability. The domain publishes eight queries
+and seven of them answer merchant questions — where an order *would* be sourced,
+which supplier is cheapest or quickest, what is owed to suppliers per currency,
+whether a supplier keeps its promises. None of those is a shopper's business, and
+several of them would be actively harmful on a public page.
 
-| Project | Repository | Purpose |
-| --- | --- | --- |
-| **Boilerplate** | [liberusoftware/boilerplate-laravel](https://github.com/liberusoftware/boilerplate-laravel) | Shared Laravel application foundation and reference composition |
-| **CMS** | [liberu-cms/cms-laravel](https://github.com/liberu-cms/cms-laravel) | Structured content, publishing, media, multisite, and headless delivery |
-| **CRM** | [liberu-crm/crm-laravel](https://github.com/liberu-crm/crm-laravel) | Customer data, sales, marketing, service, and customer success |
-| **Billing** | [liberu-billing/billing-laravel](https://github.com/liberu-billing/billing-laravel) | Products, subscriptions, invoicing, payments, and provisioning |
-| **Accounting** | [liberu-accounting/accounting-laravel](https://github.com/liberu-accounting/accounting-laravel) | Ledgers, banking, tax, expenses, close, and financial reporting |
-| **Ecommerce** | [liberu-ecommerce/ecommerce-laravel](https://github.com/liberu-ecommerce/ecommerce-laravel) | Catalog, checkout, orders, fulfillment, returns, B2B, and omnichannel commerce |
-| **Control Panel** | [liberu-control-panel/control-panel-laravel](https://github.com/liberu-control-panel/control-panel-laravel) | Hosting, infrastructure, DNS, mail, databases, backups, and security operations |
-| **Automation** | [liberu-automation/automation-laravel](https://github.com/liberu-automation/automation-laravel) | Governed workflows, provider-neutral AI, approvals, and connectors |
+What is left is the honest set: what has happened to the shopper's own order,
+which the supplier told us and which the merchant has every reason to pass on.
 
-## Security
+## What it refuses to publish
 
-Please do not report security vulnerabilities through public GitHub issues.
-Follow our [Security Policy](https://github.com/liberusoftware/documentation/blob/main/architecture/SECURITY.md) for private reporting and supported versions.
+**Who supplies the goods.** The supplier reference, code and name are read on
+every request that renders this page and none of them reaches the view. A shopper
+who can see which supplier fulfils a line can see the merchant's supply chain.
 
-## License
+**What the merchant paid.** `PurchaseView` carries `expectedCost`, `actualCost`
+and `costVariance()`. Nothing here reads them, a boundary case asserts the names
+do not appear in the package at all, and a feature case asserts neither figure is
+in the rendered HTML of a purchase that has both. An order-status page that
+publishes the cost of goods is a commercial leak that cannot be taken back.
 
-This project is open-source software. You may use, modify, and distribute it
-under the terms described in [LICENSE.md](LICENSE.md).
+**Which sources were considered.** No sourcing plan, no supply offer, no
+alternative supplier — and no control of any kind. The host read
+`$request->input('supplier_id', 'dropxl')` at checkout, so a hidden form field
+named the party who got paid. This package renders no form, no input, no select
+and no button; there is nothing to submit and nothing to tamper with.
 
-The linked license text is authoritative; this summary is not legal advice.
+**A promise nobody made.** A purchase with no promised date says so. No estimate
+is invented from a lead time, an average or anything else.
 
-## Feedback and contributing
+**A `false` where the answer is `null`.** `onTime` is `null` when there was no
+promise or no complete despatch, which is *"there was nothing to measure against"*
+and not *"it was late"*. The two get different sentences and neither stands in for
+the other.
 
-Feedback and contributions are welcome. You can help by reporting reproducible
-bugs, proposing focused enhancements, improving documentation or translations,
-and submitting tested code changes.
+**Part of an order as the whole of it.** A supplier despatching two of three is
+"part of this has been despatched", with the per-line quantities underneath so the
+claim is checkable. A purchase a merchant cancelled and a supplier shipped anyway
+shows both facts, because the goods really did leave.
 
-Before contributing, please read [CONTRIBUTING.md](https://github.com/liberusoftware/documentation/blob/main/standards/CONTRIBUTING.md) and our
-[Code of Conduct](https://github.com/liberusoftware/documentation/blob/main/architecture/CODE_OF_CONDUCT.md). Search existing issues first, then use
-the appropriate issue template. Pull requests should explain the problem and
-approach, remain focused, include or update tests, pass the required workflows,
-and document user-visible or breaking changes.
+**Which references exist.** An order this merchant holds nothing for, a
+destination belonging to somebody else, an erased destination, and an order with
+nothing to despatch are one sentence. A refusal a shopper can tell apart is an
+enumeration oracle.
 
-## Contributors
+## Installing
 
-Thank you to everyone who helps improve Liberu.
+Everything a host has to do is in [`docs/adoption.md`](docs/adoption.md) — the VCS
+`repositories` entry, `MODULES_ENABLED`, and what the host must authorise before
+it mounts the component. The decisions behind the one component, and the four
+shopper surfaces deliberately not shipped, are in
+[`docs/domain.md`](docs/domain.md). [`docs/runbook.md`](docs/runbook.md) covers
+what to do when a shopper reports that their order has no despatch information.
 
-<a href="https://github.com/liberusoftware/module-ecommerce-dropshipping-livewire/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=liberusoftware/module-ecommerce-dropshipping-livewire" alt="Contributors to liberusoftware/module-ecommerce-dropshipping-livewire">
-</a>
+## Licence
 
-[View the full contributors graph](https://github.com/liberusoftware/module-ecommerce-dropshipping-livewire/graphs/contributors).
+MIT.
